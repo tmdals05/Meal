@@ -204,7 +204,7 @@ def get_timetable():
     if start != -1 and end != -1:
         extracted_url = secureUrls[start+1:end]
     UserID = body['userRequest']['user']['id']
-    file_path = "TimeTable/" + UserID + ".png"
+    file_path = "Meal/TimeTable/" + UserID + ".png"
 
     if os.path.exists(file_path):
         os.remove(file_path)
@@ -241,7 +241,7 @@ def give_timetable():
     body = request.get_json()
     UserID = body['userRequest']['user']['id']
     #print(UserID)
-    file_path = "TimeTable/" + UserID + ".png"
+    file_path = "Meal/TimeTable/" + UserID + ".png"
     if os.path.isfile(file_path):
         location = "http://bdhs.kro.kr/image/" + UserID + ".png"
         return {
@@ -274,7 +274,7 @@ def give_timetable():
 def del_timetable():
     body = request.get_json()
     UserID = body['userRequest']['user']['id']
-    file_path = "TimeTable/" + UserID + ".png"
+    file_path = "Meal/TimeTable/" + UserID + ".png"
     if os.path.isfile(file_path):
         os.remove(file_path)
         return {
@@ -303,7 +303,7 @@ def del_timetable():
             }
         }
 
-images_folder = "TimeTable/"
+images_folder = "Meal/TimeTable/"
 @application.route("/")
 def index():
     html = ""
