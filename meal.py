@@ -16,7 +16,7 @@ Days = ['(월)', '(화)', '(수)', '(목)', '(금)', '(토)', '(일)']
 
 time_difference = 9
 
-def Is_Vacation(DATE): #요청된 요일이 방학기간인지 확인
+def is_vacation(DATE): #요청된 요일이 방학기간인지 확인
     if datetime.datetime.strptime("20220720", "%Y%m%d") < DATE < datetime.datetime.strptime("20220822", "%Y%m%d"):
         return DATE.strftime("%Y-%m-%d") + "\n해당하는 요일은 여름방학 기간입니다"
     elif datetime.datetime.strptime("20221230", "%Y%m%d") < DATE < datetime.datetime.strptime("20230201", "%Y%m%d"):
@@ -26,7 +26,7 @@ def Is_Vacation(DATE): #요청된 요일이 방학기간인지 확인
     else:
         return 0
 
-def Is_Weekend(DATE): #요청된 요일이 주말인지 확인
+def is_weekend(DATE): #요청된 요일이 주말인지 확인
     if DATE.weekday() == 5:
         return DATE.strftime("%Y-%m-%d") + "\n해당하는 요일은 토요일입니다"
     elif DATE.weekday() == 6:
@@ -79,11 +79,11 @@ def get_cal_info(json_ob): #불러온 정보에서 열량 정보를 가공함
         return 0
 
 def meal_function(SCHOOL_CODE, MEAL, DATE): #모든 정보를 보기 좋게 합침
-    if Is_Vacation(DATE) != 0:
-        return Is_Vacation(DATE)
+    if is_vacation(DATE) != 0:
+        return is_vacation(DATE)
 
-    if Is_Weekend(DATE):
-        return Is_Weekend(DATE)
+    if is_weekend(DATE):
+        return is_weekend(DATE)
 
     json_ob = load_data(SCHOOL_CODE, MEAL, DATE)
 
@@ -195,6 +195,8 @@ def cheonan_lunch_today_function(): #천안고 오늘 점심
 
 import os
 
+images_folder = "/Meal/TimeTable/"
+
 @application.route("/getimetable", methods=["POST"])
 def get_timetable():
     body = request.get_json()
@@ -204,7 +206,7 @@ def get_timetable():
     if start != -1 and end != -1:
         extracted_url = secureUrls[start+1:end]
     UserID = body['userRequest']['user']['id']
-    file_path = "Meal/TimeTable/" + UserID + ".png"
+    file_path = images_folder + UserID + ".png"
 
     if os.path.exists(file_path):
         os.remove(file_path)
@@ -241,7 +243,7 @@ def give_timetable():
     body = request.get_json()
     UserID = body['userRequest']['user']['id']
     #print(UserID)
-    file_path = "Meal/TimeTable/" + UserID + ".png"
+    file_path = images_folder + UserID + ".png"
     if os.path.isfile(file_path):
         location = "http://bdhs.kro.kr/image/" + UserID + ".png"
         return {
@@ -274,7 +276,7 @@ def give_timetable():
 def del_timetable():
     body = request.get_json()
     UserID = body['userRequest']['user']['id']
-    file_path = "Meal/TimeTable/" + UserID + ".png"
+    file_path = images_folder + UserID + ".png"
     if os.path.isfile(file_path):
         os.remove(file_path)
         return {
@@ -303,7 +305,6 @@ def del_timetable():
             }
         }
 
-images_folder = "Meal/TimeTable/"
 @application.route("/")
 def index():
     html = ""
