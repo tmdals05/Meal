@@ -17,7 +17,7 @@ Days = ['(월)', '(화)', '(수)', '(목)', '(금)', '(토)', '(일)']
 time_difference = 9 #이 코드를 켜놓는 서버가 미국에 있어 시차 적용
 Today = datetime.datetime.now() + timedelta(hours=time_difference)
 
-images_folder = "Meal/TimeTable/"
+images_folder = "/home/daniel057988/Meal/TimeTable/"
 # images_folder = "C:/Users/danie/OneDrive/문서/Python Scripts/TimeTable/"
 
 def is_vacation(DATE): #요청된 요일이 방학기간인지 확인
@@ -251,14 +251,14 @@ def del_timetable():
 @application.route("/")
 def index():
     html = ""
-    for filename in os.listdir("/Meal/TimeTable"):
+    for filename in os.listdir(images_folder):
         if filename.endswith(".png"):
             html += f"<p><img src='/image/{filename}'></p>"
     return html
 
 @application.route("/image/<path:filename>")
 def get_image(filename):
-    filepath = os.path.join("/Meal/TimeTable/", filename)
+    filepath = os.path.join(images_folder, filename)
     if not os.path.isfile(filepath) or os.path.isabs(filename):
         return "", 404
     return send_file(filepath, mimetype="image/png")
