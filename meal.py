@@ -264,6 +264,6 @@ def get_image(filename):
     return send_file(filepath, mimetype="image/png")
 
 if __name__ == "__main__":
-    application.run(host='0.0.0.0', port=int(sys.argv[1]), debug=True)
+    application.run(host='0.0.0.0', port=int(sys.argv[1]), debug=False)
 
 schedule.every().day.at("00:00").do(meal_function)
