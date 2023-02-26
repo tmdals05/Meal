@@ -258,7 +258,7 @@ def index():
 
 @application.route("/image/<path:filename>")
 def get_image(filename):
-    filepath = os.path.join(images_folder, filename)
+    filepath = os.path.join("TimeTable/", filename)
     if not os.path.isfile(filepath) or os.path.isabs(filename):
         return "", 404
     return send_file(filepath, mimetype="image/png")
