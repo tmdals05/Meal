@@ -251,7 +251,7 @@ def del_timetable():
 @application.route("/")
 def index():
     html = ""
-    for filename in os.listdir(images_folder):
+    for filename in os.listdir("/Meal/TimeTable"):
         if filename.endswith(".png"):
             html += f"<p><img src='/image/{filename}'></p>"
     return html
