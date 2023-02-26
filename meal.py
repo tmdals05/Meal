@@ -17,7 +17,7 @@ Days = ['(월)', '(화)', '(수)', '(목)', '(금)', '(토)', '(일)']
 time_difference = 9 #이 코드를 켜놓는 서버가 미국에 있어 시차 적용
 Today = datetime.datetime.now() + timedelta(hours=time_difference)
 
-images_folder = "/Meal/TimeTable/"
+images_folder = "Meal/TimeTable/"
 # images_folder = "C:/Users/danie/OneDrive/문서/Python Scripts/TimeTable/"
 
 def is_vacation(DATE): #요청된 요일이 방학기간인지 확인
