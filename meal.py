@@ -221,7 +221,7 @@ def give_timetable():
     #print(UserID)
     file_path = images_folder + UserID + ".png"
     if os.path.isfile(file_path):
-        location = "http://bdhs.kro.kr/image/" + UserID + ".png"
+        location = "http://bdhs.kro.kr:80/image/" + UserID + ".png"
         return {
             "version": "2.0",
             "template": {
