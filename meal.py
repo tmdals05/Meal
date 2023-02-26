@@ -14,7 +14,11 @@ application = Flask(__name__)
 
 Days = ['(월)', '(화)', '(수)', '(목)', '(금)', '(토)', '(일)']
 
-time_difference = 9
+time_difference = 9 #이 코드를 켜놓는 서버가 미국에 있어 시차 적용
+Today = datetime.datetime.now() + timedelta(hours=time_difference)
+
+images_folder = "/Meal/TimeTable/"
+# images_folder = "C:/Users/danie/OneDrive/문서/Python Scripts/TimeTable/"
 
 def is_vacation(DATE): #요청된 요일이 방학기간인지 확인
     if datetime.datetime.strptime("20220720", "%Y%m%d") < DATE < datetime.datetime.strptime("20220822", "%Y%m%d"):
@@ -50,7 +54,6 @@ def load_data(SCHOOL_CODE, MEAL, DATE): #나이스 교육정보 개방 포털애
 
     response = requests.get(url + queryParams)
     contents = response.text
-
     json_ob = json.loads(contents)
     #print(json_ob)
     return json_ob
@@ -58,11 +61,11 @@ def load_data(SCHOOL_CODE, MEAL, DATE): #나이스 교육정보 개방 포털애
 def get_meal_info(json_ob): #불러온 정보에서 급식 정보를 가공함
     try:
         body = json_ob['mealServiceDietInfo'][1]['row']
+
         for i in range(len(body)):
             temp = body[i]['DDISH_NM']
         
         temp = temp.replace('<br/>', '\n')
-
         temp = re.sub(r'\([^)]*\)', '', temp)
         return temp
     except:
@@ -72,8 +75,10 @@ def get_meal_info(json_ob): #불러온 정보에서 급식 정보를 가공함
 def get_cal_info(json_ob): #불러온 정보에서 열량 정보를 가공함
     try:
         body = json_ob['mealServiceDietInfo'][1]['row']
+
         for i in range(len(body)):
             cal_info = body[i]['CAL_INFO']
+        
         return cal_info
     except:
         return 0
@@ -93,7 +98,7 @@ def meal_function(SCHOOL_CODE, MEAL, DATE): #모든 정보를 보기 좋게 합�
         meal_info = get_meal_info(json_ob)
     #print(meal_info)
     if get_cal_info(json_ob) == 0:
-        return "서버에서 불러올 데이터가 없습니다\nCAL_INFO_ERROR\n상담직원에게 에러코드를 알려주세요"
+        return "서버에서 불러올 데이터가 없습니다\nCAL_INFO_ERROR"
     else:
         cal_info = get_cal_info(json_ob)
     #print(cal_info)
@@ -108,7 +113,7 @@ def meal_function(SCHOOL_CODE, MEAL, DATE): #모든 정보를 보기 좋게 합�
     try:
         meal_final = (meal_date + Days[day_of_week % 7] + MEAL_MENU + "\n\n" + meal_info + "\n\n(" + cal_info + ")")
     except:
-        meal_final = "서버에서 불러올 데이터가 없습니다\nFINAL_ERROR\n상담직원에게 에러코드를 알려주세요"
+        meal_final = "서버에서 불러올 데이터가 없습니다\nFINAL_ERROR"
         return meal_final
 
     meal_real_final = {
@@ -125,49 +130,46 @@ def meal_function(SCHOOL_CODE, MEAL, DATE): #모든 정보를 보기 좋게 합�
     }
     #print(meal_real_final)
     return meal_real_final
-
-def last_check(SCHOOL_CODE, MEAL, DATE): #마지막으로 보낼 수 있는 문자열인지 확인함
-    if 'version' not in meal_function(SCHOOL_CODE, MEAL, DATE):
+    
+def last_check(text): #마지막으로 보낼 수 있는 문자열인지 확인함
+    if 'version' not in text:
         return {
         "version": "2.0",
         "template": {
             "outputs": [
                 {
                     "simpleText": {
-                        "text": (meal_function(SCHOOL_CODE, MEAL, DATE))
+                        "text": (text)
                     }
                 }
             ]
         }
     }
     else:
-        return meal_function(SCHOOL_CODE, MEAL, DATE)
-
+        return text
 
 @application.route("/lunch/today", methods=["POST"])
 def lunch_today_function(): #오늘 점심
     #print(request.get_json())
-    DATE = datetime.datetime.now() + timedelta(hours=time_difference)
-    response = last_check('8140387', '2', DATE)
-    return jsonify(response)
+    response = meal_function('8140387', '2', Today)
+    return jsonify(last_check(response))
 
 @application.route("/dinner/today", methods=["POST"])
 def dinner_today_function(): #오늘 석식
-    DATE = datetime.datetime.today() + timedelta(hours=time_difference)
-    response = last_check('8140387', '3', DATE)
-    return jsonify(response)
+    response = meal_function('8140387', '3', Today)
+    return jsonify(last_check(response))
+
+Tomorrow = datetime.datetime.today() + timedelta(hours=time_difference) + timedelta(days = 1)
 
 @application.route("/lunch/tomorrow", methods=["POST"])
 def lunch_tomorrow_function(): #내일 점심
-    DATE = datetime.datetime.today() + timedelta(hours=time_difference) + timedelta(days = 1)
-    response = last_check('8140387', '2', DATE)
-    return jsonify(response)
+    response = meal_function('8140387', '2', Tomorrow)
+    return jsonify(last_check(response))
 
 @application.route("/dinner/tomorrow", methods=["POST"])
 def dinner_tomorrow_function(): #내일 석식
-    DATE = datetime.datetime.today() + timedelta(hours=time_difference) + timedelta(days = 1)
-    response = last_check('8140387', '3', DATE)
-    return jsonify(response)
+    response = meal_function('8140387', '3', Tomorrow)
+    return jsonify(last_check(response))
 
 @application.route("/meal/choose", methods=["POST"])
 def meal_choose(): #원하는 날짜 선택
@@ -183,19 +185,15 @@ def meal_choose(): #원하는 날짜 선택
         meal_type = 2
     if json_ob == "석식":
         meal_type = 3
-    response = last_check('8140387', str(meal_type), DATE)
-    return jsonify(response)
+    response = meal_function('8140387', str(meal_type), DATE)
+    return jsonify(last_check(response))
     
           
 @application.route("/lunch/cheonan", methods=["POST"])
 def cheonan_lunch_today_function(): #천안고 오늘 점심
     DATE = datetime.datetime.today() + datetime.timedelta(hours=time_difference)
-    response = last_check('8140104', '2', DATE)
-    return jsonify(response)
-
-import os
-
-images_folder = "/Meal/TimeTable/"
+    response = meal_function('8140104', '2', DATE)
+    return jsonify(last_check(response))
 
 @application.route("/getimetable", methods=["POST"])
 def get_timetable():
@@ -211,32 +209,10 @@ def get_timetable():
     if os.path.exists(file_path):
         os.remove(file_path)
         urllib.request.urlretrieve(extracted_url, file_path)
-        return {
-            "version": "2.0",
-            "template": {
-                "outputs": [
-                    {
-                        "simpleText": {
-                            "text": "이미 이미지가 있어 이미지를 덮어씌웠습니다."
-                        }
-                    }
-                ]
-            }
-        }
+        return last_check("이미 이미지가 있어 이미지를 덮어씌웠습니다.")
     else:
         urllib.request.urlretrieve(extracted_url, file_path)
-        return {
-            "version": "2.0",
-            "template": {
-                "outputs": [
-                    {
-                        "simpleText": {
-                            "text": "이미지 업로드를 완료하였습니다."
-                        }
-                    }
-                ]
-            }
-        }
+        return last_check("이미지 업로드를 완료하였습니다.")
 
 @application.route("/giveTimetable", methods=["POST"])
 def give_timetable():
@@ -259,18 +235,7 @@ def give_timetable():
             }
         }
     else:
-        return {
-            "version": "2.0",
-            "template": {
-                "outputs": [
-                    {
-                        "simpleText": {
-                            "text": "이미지가 업로드 되어있지 않습니다.\n\"시간표 설정\"을 입력하여 시간표를 업로드 해주세요"
-                        }
-                    }
-                ]
-            }
-        }
+        return last_check("이미지가 업로드 되어있지 않습니다.\n\"시간표 설정\"을 입력하여 시간표를 업로드 해주세요")
     
 @application.route("/delTimetable", methods=["POST"])
 def del_timetable():
@@ -279,31 +244,9 @@ def del_timetable():
     file_path = images_folder + UserID + ".png"
     if os.path.isfile(file_path):
         os.remove(file_path)
-        return {
-            "version": "2.0",
-            "template": {
-                "outputs": [
-                    {
-                        "simpleText": {
-                            "text": "시간표를 삭제하였습니다."
-                        }
-                    }
-                ]
-            }
-        }
+        return last_check("시간표를 삭제하였습니다.")
     else:
-        return {
-            "version": "2.0",
-            "template": {
-                "outputs": [
-                    {
-                        "simpleText": {
-                            "text": "시간표가 업로드 되어있지 않습니다."
-                        }
-                    }
-                ]
-            }
-        }
+        return last_check("시간표가 업로드 되어있지 않습니다.")
 
 @application.route("/")
 def index():
