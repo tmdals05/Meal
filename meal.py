@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 import datetime
 import json
 import re
-import schedule
 import os
 import urllib.request
 from apscheduler.schedulers.background import BackgroundScheduler
