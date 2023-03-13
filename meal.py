@@ -10,6 +10,8 @@ import os
 import urllib.request
 from apscheduler.schedulers.background import BackgroundScheduler
 
+time_difference = 0 #이 코드를 켜놓는 서버가 미국에 있어 시차 적용
+
 def day():
     global Today, Tomorrow
     Today = datetime.datetime.now() + timedelta(hours=time_difference)
@@ -23,8 +25,6 @@ schedule.start()
 application = Flask(__name__)
 
 Days = ['(월)', '(화)', '(수)', '(목)', '(금)', '(토)', '(일)']
-
-time_difference = 0 #이 코드를 켜놓는 서버가 미국에 있어 시차 적용
 
 images_folder = "/home/daniel057988/Meal/TimeTable/"
 # images_folder = "C:/Users/danie/OneDrive/문서/Python Scripts/TimeTable/"
