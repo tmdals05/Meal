@@ -9,13 +9,18 @@ import re
 import schedule
 import os
 import urllib.request
+import time
 
 application = Flask(__name__)
 
 Days = ['(월)', '(화)', '(수)', '(목)', '(금)', '(토)', '(일)']
 
 time_difference = 0 #이 코드를 켜놓는 서버가 미국에 있어 시차 적용
-Today = datetime.datetime.now() + timedelta(hours=time_difference)
+
+def day():
+    global Today, Tomorrow
+    Today = datetime.datetime.now() + timedelta(hours=time_difference)
+    Tomorrow = datetime.datetime.today() + timedelta(hours=time_difference) + timedelta(days = 1)
 
 images_folder = "/home/daniel057988/Meal/TimeTable/"
 # images_folder = "C:/Users/danie/OneDrive/문서/Python Scripts/TimeTable/"
@@ -159,8 +164,6 @@ def dinner_today_function(): #오늘 석식
     response = meal_function('8140387', '3', Today)
     return jsonify(last_check(response))
 
-Tomorrow = datetime.datetime.today() + timedelta(hours=time_difference) + timedelta(days = 1)
-
 @application.route("/lunch/tomorrow", methods=["POST"])
 def lunch_tomorrow_function(): #내일 점심
     response = meal_function('8140387', '2', Tomorrow)
@@ -266,4 +269,8 @@ def get_image(filename):
 if __name__ == "__main__":
     application.run(host='0.0.0.0', port=int(sys.argv[1]), debug=False)
 
-schedule.every().day.at("00:00").do(meal_function)
+schedule.every().day.at("00:00").do(day)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
