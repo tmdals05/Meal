@@ -270,6 +270,7 @@ if __name__ == "__main__":
     application.run(host='0.0.0.0', port=int(sys.argv[1]), debug=False)
 
 schedule.every().day.at("00:00").do(day)
+schedule.every().day.at("01:30").do(day)
 
 while True:
     schedule.run_pending()
